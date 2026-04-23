@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UJANG STORE - Digital Shop</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Konfigurasi Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        luxury: {
+                            bg: '#050505',
+                            card: '#121212',
+                            gold: '#D4AF37',
+                            goldlight: '#F3E5AB',
+                            silver: '#A0A0A0',
+                            border: '#333333',
+                            green: '#22c55e'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-in': 'slideIn 0.3s ease-out forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'bounce-short': 'bounce-short 0.5s ease-in-out 1'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                        'bounce-short': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-25%)' },
+                            '100%': { transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+        input {
+            background-color: #0a0a0a !important;
+            border: 1px solid #333 !important;
+            color: white !important;
+        }
+        input:focus { border-color: #D4AF37 !important; outline: none; }
+        ::selection { background: #D4AF37; color: #000; }
+    </style>
+</head>
+<body class="bg-luxury-bg text-gray-100 font-sans selection:bg-luxury-gold selection:text-black">
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- DATA PRODUK FINAL (ALIGHT 2000 DIHAPUS) ---
+        const brands = [
+            // VIDEO EDITING
+            { 
+                id: 'alm', name: 'Alight Motion', category: 'Editing', icon: 'fa-video', color: 'bg-blue-900', rating: 4.8, desc: 'No Watermark & All Effects',
+                packages: [
+                    // PAKET 2000 DIHAPUS
+                    { id: 'alm-5k', label: '1 Tahun', price: 5000, isPopular: true }, 
+                ]
+            },
+            { 
+                id: 'ins', name: 'InShot', category: 'Editing', icon: 'fa-scissors', color: 'bg-orange-900', rating: 4.6, desc: 'Video Editor Ringan',
+                packages: [
+                    { id: 'ins-1', label: '1 Tahun', price: 7000 },
+                ]
+            },
+            { 
+                id: 'vid', name: 'VidVid', category: 'Editing', icon: 'fa-play-circle', color: 'bg-indigo-900', rating: 4.4, desc: 'Unlock Premium',
+                packages: [
+                    { id: 'vid-1', label: '1 Tahun', price: 5000 },
+                ]
+            },
+
+            // STREAMING
+            { 
+                id: 'yt', name: 'YouTube', category: 'Streaming', icon: 'fa-youtube', color: 'bg-red-900', rating: 5.0, desc: 'Tanpa Iklan',
+                packages: [
+                    { id: 'yt-fam', label: 'Family Plan', price: 500 },
+                    { id: 'yt-head', label: 'Individu (Head)', price: 3500, isPopular: true },
+                ]
+            },
+            { 
+                id: 'sp', name: 'Spotify', category: 'Streaming', icon: 'fa-spotify', color: 'bg-green-800', rating: 5.0, desc: 'Musik Premium',
+                packages: [
+                    { id: 'sp-1', label: '1 Bulan', price: 8000 },
+                    { id: 'sp-2', label: '2 Bulan', price: 9000 },
+                    { id: 'sp-3', label: '3 Bulan', price: 11000 },
+                ]
+            },
+            { 
+                id: 'iq', name: 'iQIYI', category: 'Streaming', icon: 'fa-play', color: 'bg-green-900', rating: 4.8, desc: 'Drasia China',
+                packages: [
+                    { id: 'iq-14', label: '14 Hari', price: 5000 },
+                ]
+            },
+            { 
+                id: 'viu', name: 'Viu', category: 'Streaming', icon: 'fa-film', color: 'bg-blue-900', rating: 4.7, desc: 'Film Asia',
+                packages: [
+                    { id: 'viu-1', label: '1 Bulan', price: 1500 },
+                    { id: 'viu-3', label: '3 Bulan', price: 3000 },
+                    { id: 'viu-lt', label: 'Lifetime', price: 5000 },
+                ]
+            },
+            { 
+                id: 'am', name: 'Apple Music', category: 'Streaming', icon: 'fa-music', color: 'bg-pink-900', rating: 4.9, desc: 'Lossless Audio',
+                packages: [
+                    { id: 'am-1', label: '1 Bulan', price: 3000 },
+                ]
+            },
+            { 
+                id: 'bs', name: 'Bstation', category: 'Streaming', icon: 'fa-gamepad', color: 'bg-teal-900', rating: 4.7, desc: 'Premium',
+                packages: [
+                    { id: 'bs-1', label: '1 Tahun', price: 12000 },
+                ]
+            },
+            { 
+                id: 'db', name: 'DramaBoss', category: 'Streaming', icon: 'fa-clapperboard', color: 'bg-purple-900', rating: 4.5, desc: 'Unlock All Dramas',
+                packages: [
+                    { id: 'db-1', label: 'Unlock', price: 10000 },
+                ]
+            },
+            { 
+                id: 'mb', name: 'MovieBox', category: 'Streaming', icon: 'fa-ticket', color: 'bg-yellow-900', rating: 4.6, desc: 'Unlock All Movies',
+                packages: [
+                    { id: 'mb-1', label: '1 Bulan', price: 5000 },
+                    { id: 'mb-3', label: '3 Bulan', price: 8000 },
+                    { id: 'mb-12', label: '1 Tahun', price: 12000 },
+                ]
+            },
+            { 
+                id: 'rs', name: 'ReelShort', category: 'Streaming', icon: 'fa-mobile-screen', color: 'bg-red-800', rating: 4.5, desc: 'Coins VIP',
+                packages: [
+                    { id: 'rs-1b', label: '1 Miliar Koin', price: 5000 },
+                    { id: 'rs-3b', label: '3 Miliar Koin', price: 10000 },
+                    { id: 'rs-1y', label: '1 Tahun VIP', price: 27000 },
+                ]
+            },
+
+            // GAMING
+            { 
+                id: 'mc', name: 'Minecraft', category: 'Gaming', icon: 'fa-cube', rating: 5.0, desc: 'Full Access',
+                packages: [
+                    { id: 'mc-1', label: 'Full Access', price: 5000 },
+                ]
+            },
+
+            // LAINNYA
+            { 
+                id: 'gc', name: 'Get Contact', category: 'Lainnya', icon: 'fa-address-book', color: 'bg-blue-800', rating: 4.5, desc: 'Nomor Tak Dikenal',
+                packages: [
+                    { id: 'gc-1', label: '1 Bulan', price: 7000 },
+                ]
+            },
+        ];
+
+        // --- COMPONENTS ---
+
+        // 1. LIVE FEED
+        const LiveFeed = () => {
+            const [txs, setTxs] = useState([]);
+            
+            useEffect(() => {
+                const names = ['Budi', 'Siti', 'Joko', 'Dewi', 'Rian', 'Putri'];
+                const items = ['YouTube Fam', 'Alight Motion', 'Spotify 3B', 'Minecraft', 'Viu Lifetime'];
+                setTxs([{id: 1, name: 'Rizky', item: 'Spotify 3B', time: 'baru saja'}]);
+
+                const interval = setInterval(() => {
+                    const newTx = {
+                        id: Date.now(),
+                        name: names[Math.floor(Math.random() * names.length)],
+                        item: items[Math.floor(Math.random() * items.length)],
+                        time: 'baru saja'
+                    };
+                    setTxs(prev => [newTx, ...prev].slice(0, 3));
+                }, 8000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="fixed bottom-20 right-4 z-40 flex flex-col gap-2 w-72 pointer-events-none">
+                    {txs.map((tx) => (
+                        <div key={tx.id} className="bg-luxury-card/90 backdrop-blur border border-luxury-gold/30 shadow-lg rounded-lg p-3 flex items-center gap-3 animate-slide-in pointer-events-auto">
+                            <div className="w-8 h-8 rounded-full bg-luxury-gold text-black flex items-center justify-center text-xs font-bold">
+                                <i className="fa-solid fa-check"></i>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-white truncate"><span className="text-luxury-gold">{tx.name}</span> membeli</p>
+                                <p className="text-xs text-gray-400 truncate">{tx.item}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // 2. MODAL PILIH PAKET
+        const PackageModal = ({ isOpen, onClose, brandData, onAddToCart }) => {
+            const [selectedPkg, setSelectedPkg] = useState(null);
+            useEffect(() => { if(isOpen) setSelectedPkg(null); }, [isOpen, brandData]);
+
+            if (!isOpen || !brandData) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-luxury-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-luxury-border relative">
+                        <div className={`${brandData.color} p-6 flex justify-between items-center relative overflow-hidden`}>
+                            <div className="absolute inset-0 bg-black/50"></div>
+                            <div className="relative z-10 flex items-center gap-4 text-white">
+                                <div className="w-12 h-12 bg-white/10 backdrop-blur rounded-xl flex items-center justify-center text-2xl border border-white/20">
+                                    <i className={`fa-brands ${brandData.icon}`}></i>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-xl">{brandData.name}</h3>
+                                    <p className="text-xs text-white/70">Pilih Paket</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="relative z-10 w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-white transition">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-3 bg-luxury-card">
+                            {brandData.packages.map((pkg) => (
+                                <div 
+                                    key={pkg.id}
+                                    onClick={() => setSelectedPkg(pkg)}
+                                    className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex justify-between items-center ${selectedPkg?.id === pkg.id ? 'border-luxury-gold bg-luxury-gold/10' : 'border-luxury-border hover:border-gray-600'}`}
+                                >
+                                    <div>
+                                        <span className="font-bold text-white block">{pkg.label}</span>
+                                        {pkg.isPopular && <span className="text-[9px] bg-luxury-gold text-black px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">Best Seller</span>}
+                                    </div>
+                                    <span className="font-bold text-luxury-gold text-lg">Rp{pkg.price.toLocaleString('id-ID')}</span>
+                                </div>
+                            ))}
+                            <button 
+                                onClick={() => selectedPkg && onAddToCart(brandData, selectedPkg)}
+                                disabled={!selectedPkg}
+                                className="w-full py-4 rounded-2xl font-bold text-black bg-gradient-to-r from-luxury-gold to-luxury-goldlight hover:brightness-110 transition shadow-lg shadow-luxury-gold/20 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                            >
+                                Masukkan Keranjang
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 3. MODAL KERANJANG
+        const CartModal = ({ isOpen, onClose, cart, onUpdateQty, onCheckout }) => {
+            const total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+            if (!isOpen) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose}></div>
+                    <div className="relative bg-luxury-card w-full max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-luxury-border animate-slide-in">
+                        <div className="p-6 border-b border-luxury-border flex justify-between items-center bg-luxury-bg/50">
+                            <h3 className="font-bold text-xl text-white flex items-center gap-2">
+                                <i className="fa-solid fa-cart-shopping text-luxury-gold"></i> Keranjang
+                            </h3>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full bg-luxury-border flex items-center justify-center text-gray-400 hover:text-white transition">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto flex-1 bg-luxury-card">
+                            {cart.length === 0 ? (
+                                <div className="text-center py-10 text-gray-500">Keranjang kosong</div>
+                            ) : (
+                                cart.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-4 bg-luxury-bg p-4 rounded-2xl border border-luxury-border shadow-sm mb-3">
+                                        <div className={`w-12 h-12 rounded-xl ${item.color} text-white flex items-center justify-center text-xl opacity-80`}>
+                                            <i className={`fa-brands ${item.icon}`}></i>
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-white text-sm">{item.brandName}</h4>
+                                            <p className="text-xs text-gray-400">{item.pkgLabel}</p>
+                                            <p className="text-xs font-bold text-luxury-gold mt-1">Rp{item.price.toLocaleString('id-ID')}</p>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-black/50 rounded-lg p-1 border border-luxury-border">
+                                            <button onClick={() => onUpdateQty(idx, -1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white">-</button>
+                                            <span className="text-xs font-bold w-4 text-center text-white">{item.qty}</span>
+                                            <button onClick={() => onUpdateQty(idx, 1)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white">+</button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        {cart.length > 0 && (
+                            <div className="p-6 border-t border-luxury-border bg-luxury-bg/50">
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className="text-gray-400 text-sm">Total</span>
+                                    <span className="text-2xl font-bold text-luxury-gold">Rp{total.toLocaleString('id-ID')}</span>
+                                </div>
+                                <button onClick={onCheckout} className="w-full py-4 rounded-xl bg-luxury-gold hover:bg-luxury-goldlight text-black font-bold text-lg shadow-lg transition flex items-center justify-center gap-2">
+                                    Checkout <i className="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // 4. MODAL PEMBAYARAN (TELEGRAM T.ME/BUJAJG)
+        const PaymentModal = ({ isOpen, onClose, total, cart, onConfirm }) => {
+            const [tgUser, setTgUser] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [step, setStep] = useState(1);
+
+            if (!isOpen) return null;
+
+            const handleSudahBayar = () => setStep(2);
+
+            const handleKirimKeAdmin = () => {
+                if(!tgUser) { alert("Username wajib diisi!"); return; }
+                setLoading(true);
+                setTimeout(() => {
+                    setLoading(false);
+                    
+                    // FORMAT PESAN STATIS SESUAI REQUEST
+                    const itemsDetail = cart.map(i => `- ${i.brandName} (${i.pkgLabel}) x${i.qty}`).join('\n');
+                    const message = `
+*📝 PESANAN BARU*
+------------------------------
+👤 *Username:* @${tgUser}
+💰 *Total:* Rp${total.toLocaleString('id-ID')}
+📦 *Detail Item:*
+ ${itemsDetail}
+------------------------------
+*Status:* Menunggu Proses
+*SS Bukti:* (Mohon lampirkan screenshot pembayaran)
+                    `.trim();
+
+                    // LINK T.ME/BUJAJG
+                    const adminUsername = "bujajg"; 
+                    const telegramUrl = `https://t.me/${adminUsername}?text=${encodeURIComponent(message)}`;
+                    
+                    window.open(telegramUrl, '_blank');
+                    onConfirm();
+                }, 1500);
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-lg">
+                    <div className="bg-luxury-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-luxury-border relative animate-fade-in">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-luxury-gold via-white to-luxury-gold"></div>
+                        <div className="p-6 text-center border-b border-luxury-border">
+                            <h3 className="text-xl font-bold text-white">{step === 1 ? 'Scan QRIS' : 'Konfirmasi'}</h3>
+                        </div>
+                        <div className="p-6 flex flex-col items-center gap-6 bg-luxury-card">
+                            {step === 1 ? (
+                                <>
+                                    <div className="relative group">
+                                        <div className="absolute -inset-1 bg-luxury-gold rounded-xl blur opacity-20 group-hover:opacity-40 transition"></div>
+                                        <div className="relative bg-white p-2 rounded-xl shadow-2xl border-2 border-luxury-gold">
+                                            <img src="qris.jpg" alt="QRIS" className="w-64 h-64 object-contain" onError={(e) => { e.target.onerror = null; e.target.src = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=UjangStorePayment'; }} />
+                                        </div>
+                                    </div>
+                                    <div className="w-full bg-luxury-bg p-4 rounded-xl border border-luxury-border text-center">
+                                        <p className="text-xs text-gray-400 uppercase">Total Bayar</p>
+                                        <p className="text-3xl font-bold text-luxury-gold">Rp{total.toLocaleString('id-ID')}</p>
+                                    </div>
+                                    <button onClick={handleSudahBayar} className="w-full py-4 rounded-xl bg-luxury-gold text-black font-bold hover:bg-luxury-goldlight transition shadow-lg">Saya Sudah Bayar</button>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-full bg-luxury-bg p-4 rounded-xl border border-luxury-border">
+                                        <label className="block text-xs font-bold text-luxury-gold uppercase mb-2">Username Telegram</label>
+                                        <div className="relative">
+                                            <span className="absolute left-4 top-3.5 text-gray-500 font-bold">@</span>
+                                            <input type="text" value={tgUser} onChange={(e) => setTgUser(e.target.value)} placeholder="username_anda" className="w-full pl-10 pr-4 py-3.5 rounded-xl" />
+                                        </div>
+                                    </div>
+                                    <div className="w-full bg-blue-900/20 p-4 rounded-xl border border-blue-900/50 text-blue-300 text-sm flex gap-3">
+                                        <i className="fa-solid fa-camera mt-1"></i>
+                                        <p>Screenshot bukti transfer, lalu kirim ke admin @bujajg.</p>
+                                    </div>
+                                    <button onClick={handleKirimKeAdmin} disabled={loading} className="w-full py-4 rounded-xl bg-luxury-gold text-black font-bold hover:bg-luxury-goldlight transition shadow-lg flex justify-center items-center gap-2 disabled:opacity-70">
+                                        {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Kirim ke Admin'}
+                                    </button>
+                                    <button onClick={() => setStep(1)} className="text-sm text-gray-500 hover:text-white underline">Kembali ke QRIS</button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- APP UTAMA ---
+        const App = () => {
+            const [cart, setCart] = useState([]);
+            const [searchTerm, setSearchTerm] = useState('');
+            const [activeCategory, setActiveCategory] = useState('All');
+            const [pkgModal, setPkgModal] = useState(null);
+            const [cartModalOpen, setCartModalOpen] = useState(false);
+            const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+            const [toastMsg, setToastMsg] = useState(null);
+
+            useEffect(() => { document.documentElement.classList.add('dark'); }, []);
+
+            const categories = ['All', ...new Set(brands.map(b => b.category))];
+
+            const filteredBrands = useMemo(() => {
+                return brands.filter(brand => {
+                    const matchSearch = brand.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchCat = activeCategory === 'All' || brand.category === activeCategory;
+                    return matchSearch && matchCat;
+                });
+            }, [searchTerm, activeCategory]);
+
+            const addToCart = (brand, pkg) => {
+                const existing = cart.find(item => item.pkgId === pkg.id);
+                if (existing) {
+                    setCart(cart.map(item => item.pkgId === pkg.id ? { ...item, qty: item.qty + 1 } : item));
+                } else {
+                    setCart([...cart, { brandId: brand.id, brandName: brand.name, pkgId: pkg.id, pkgLabel: pkg.label, price: pkg.price, color: brand.color, icon: brand.icon, qty: 1 }]);
+                }
+                setPkgModal(null);
+                setCartModalOpen(true); 
+                setToastMsg(`${brand.name} ${pkg.label} masuk keranjang`);
+                setTimeout(() => setToastMsg(null), 3000);
+            };
+
+            const updateQty = (index, change) => {
+                const newCart = [...cart];
+                newCart[index].qty += change;
+                if (newCart[index].qty <= 0) newCart.splice(index, 1);
+                setCart(newCart);
+            };
+
+            const handleCheckout = () => { setCartModalOpen(false); setPaymentModalOpen(true); };
+            const handlePaymentConfirm = () => { setPaymentModalOpen(false); setCart([]); };
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* HEADER */}
+                    <header className="fixed top-0 w-full z-40 glass border-b border-luxury-border">
+                        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-luxury-gold to-yellow-200 text-black flex items-center justify-center font-bold rounded-xl text-lg shadow-lg">US</div>
+                                <div>
+                                    <h1 className="text-xl font-bold tracking-tight text-white leading-none">UJANG STORE</h1>
+                                    <span className="text-[10px] text-luxury-gold font-semibold tracking-widest uppercase">Digital Shop</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setCartModalOpen(true)} className="relative w-10 h-10 rounded-full bg-luxury-gold text-black flex items-center justify-center hover:bg-white transition shadow-lg shadow-luxury-gold/20">
+                                    <i className="fa-solid fa-cart-shopping"></i>
+                                    {cart.length > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">{cart.reduce((a,b)=>a+b.qty,0)}</span>}
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-grow pt-28 pb-24 container mx-auto px-4">
+                        
+                        {/* HERO */}
+                        <div className="relative w-full h-[350px] rounded-[2rem] overflow-hidden mb-12 shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1600&auto=format&fit=crop" alt="Luxury Car" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent flex flex-col justify-center px-8 md:px-16 text-white">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-luxury-gold text-black font-bold text-xs rounded-full mb-6 w-fit">
+                                    <span className="w-2 h-2 bg-black rounded-full animate-pulse"></span> TERPERCAYA & MURAH
+                                </div>
+                                <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-luxury-gold leading-tight">Solusi Akun Premium <br/>No. 1 Indonesia</h2>
+                                <p className="text-gray-300 max-w-lg text-lg">Akses ribuan fitur premium mulai dari Rp500. Proses hitungan detik.</p>
+                            </div>
+                        </div>
+
+                        {/* SEARCH & FILTER */}
+                        <div className="mb-10 flex flex-col md:flex-row gap-4 justify-between items-center bg-luxury-card p-4 rounded-2xl border border-luxury-border shadow-lg">
+                            <div className="relative w-full md:w-1/3">
+                                <i className="fa-solid fa-search absolute left-4 top-3.5 text-gray-500"></i>
+                                <input type="text" value={searchTerm} onChange={(e)=>setSearchTerm(e.target.value)} placeholder="Cari produk (cth: Spotify)..." className="w-full pl-10 pr-4 py-3 rounded-xl bg-luxury-bg border border-luxury-border focus:border-luxury-gold outline-none text-white" />
+                            </div>
+                            <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+                                {categories.map(cat => (
+                                    <button key={cat} onClick={()=>setActiveCategory(cat)} className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-300 border ${activeCategory === cat ? 'bg-luxury-gold text-black border-luxury-gold shadow-lg shadow-luxury-gold/20' : 'bg-luxury-bg text-gray-400 border-luxury-border hover:text-white hover:border-gray-500'}`}>
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* PRODUCT GRID */}
+                        <div id="products" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mb-20">
+                            {filteredBrands.map(brand => (
+                                <div key={brand.id} onClick={() => setPkgModal(brand)} className="group bg-luxury-card rounded-2xl p-5 border border-luxury-border hover:shadow-xl hover:border-luxury-gold/50 transition-all duration-300 cursor-pointer flex flex-col h-full relative overflow-hidden">
+                                    <div className={`absolute inset-0 ${brand.color} opacity-0 group-hover:opacity-5 transition-opacity`}></div>
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <div className={`w-14 h-14 rounded-2xl ${brand.color} text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform`}>
+                                            <i className={`fa-brands ${brand.icon}`}></i>
+                                        </div>
+                                        <span className="text-xs font-bold text-luxury-gold bg-luxury-gold/10 px-2 py-1 rounded border border-luxury-gold/20">
+                                            Rp{brand.packages[0].price.toLocaleString('id-ID')}
+                                        </span>
+                                    </div>
+                                    <div className="relative z-10 flex-1">
+                                        <h3 className="font-bold text-lg text-white group-hover:text-luxury-gold transition-colors mb-1">{brand.name}</h3>
+                                        <p className="text-xs text-luxury-silver uppercase tracking-wider">{brand.category}</p>
+                                        <p className="text-xs text-gray-500 line-clamp-2 mt-2 h-8">{brand.desc}</p>
+                                    </div>
+                                    <div className="mt-auto pt-4 border-t border-luxury-border/50 w-full relative z-10">
+                                        <span className="text-sm font-bold text-luxury-gold group-hover:underline">Pilih Paket</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                    </main>
+
+                    {/* FOOTER */}
+                    <footer className="bg-luxury-card border-t border-luxury-border py-8">
+                        <div className="container mx-auto px-4 text-center">
+                            <div className="w-16 h-16 bg-luxury-gold text-black flex items-center justify-center font-bold rounded-2xl text-2xl mx-auto mb-4">US</div>
+                            <h2 className="text-2xl font-bold text-white mb-2">UJANG STORE</h2>
+                            <p className="text-gray-500 text-sm mb-6">Solusi digital premium termurah di Indonesia.</p>
+                            <p className="text-gray-600 text-xs">&copy; 2024 Ujang Store. All Rights Reserved.</p>
+                        </div>
+                    </footer>
+
+                    {/* FLOATING COMPONENTS */}
+                    <LiveFeed />
+                    {toastMsg && (
+                        <div className="fixed bottom-4 right-4 z-50 bg-luxury-green text-black px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce-short border border-green-400">
+                            <i className="fa-solid fa-check-circle text-xl"></i>
+                            <div>
+                                <h4 className="font-bold text-sm">Berhasil!</h4>
+                                <p className="text-xs opacity-80">{toastMsg}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* MODALS */}
+                    <PackageModal isOpen={!!pkgModal} onClose={() => setPkgModal(null)} brandData={pkgModal} onAddToCart={addToCart} />
+                    <CartModal isOpen={cartModalOpen} onClose={() => setCartModalOpen(false)} cart={cart} onUpdateQty={updateQty} onCheckout={handleCheckout} />
+                    <PaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} total={cart.reduce((a,b)=>a+(b.price*b.qty),0)} cart={cart} onConfirm={handlePaymentConfirm} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
